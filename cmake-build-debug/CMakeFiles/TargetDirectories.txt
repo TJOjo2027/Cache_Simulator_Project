@@ -1,3 +1,0 @@
-C:/Users/tojo/Desktop/Cache_Simulator_Project/cmake-build-debug/CMakeFiles/Cache_Simulator_Project.dir
-C:/Users/tojo/Desktop/Cache_Simulator_Project/cmake-build-debug/CMakeFiles/edit_cache.dir
-C:/Users/tojo/Desktop/Cache_Simulator_Project/cmake-build-debug/CMakeFiles/rebuild_cache.dir
