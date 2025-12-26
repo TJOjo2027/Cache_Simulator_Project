@@ -3,4 +3,8 @@ project(Cache_Simulator_Project)
 
 set(CMAKE_CXX_STANDARD 20)
 
-add_executable(Cache_Simulator_Project cache_sim_driver.cpp)
+add_executable(Cache_Simulator_Project cache_sim_driver.cpp
+        cache.h
+        dataMem.h
+        cache.cpp
+        dataMem.cpp)
