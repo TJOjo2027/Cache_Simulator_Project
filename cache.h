@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <cassert>
+#include <cstddef>
 using namespace std;
 
 struct CacheLine {
@@ -23,7 +24,8 @@ struct Cache {
     size_t blockSize;
     size_t numLines;
     vector <CacheLine> cacheLines;
-    void initCache(size_t cacheSize, size_t blockSize);
+    void initCache(size_t cacheSizeInKB, size_t blockSizeInBytes);
+    void displayCacheSpecs();
 };
 
 #endif //CACHE_H

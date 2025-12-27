@@ -6,6 +6,8 @@
 
 #include "dataMem.h"
 #include <cstdlib>
+#include <iostream>
+#include <ostream>
 using namespace std;
 
 
@@ -19,6 +21,10 @@ void DataMemory::initDataMemory(size_t numKB) {
         char randomChar = (rand() % (90 - 65 + 1)) + 65;
         this -> memory[i] = randomChar;
     }
+}
+
+void DataMemory::displayDataMemorySpecs() {
+    cout << "DATA MEMORY SIZE: " << this -> memSize << " KB"<< endl;
 }
 
 // implement reading and writing (simple)

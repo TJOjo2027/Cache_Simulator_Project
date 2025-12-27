@@ -7,4 +7,6 @@ add_executable(Cache_Simulator_Project cache_sim_driver.cpp
         cache.h
         dataMem.h
         cache.cpp
-        dataMem.cpp)
+        dataMem.cpp
+        simulationStats.h
+        simulationStats.cpp)

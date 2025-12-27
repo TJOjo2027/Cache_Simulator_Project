@@ -5,16 +5,18 @@
 // THESE ARE ALL THE FUNCTIONS FOR THE CACHE OBJECT
 
 #include "cache.h"
+#include <iostream>
 using namespace std;
 
-void Cache::initCache(size_t cacheSize, size_t blockSize) {
+void Cache::initCache(size_t cacheSizeInKB, size_t blockSizeInBytes) {
     // set the cache member variables to defaults
-    this -> cacheSize = cacheSize;
-    this -> blockSize = blockSize;
+    this -> cacheSize = 1024 * cacheSizeInKB;
+    this -> blockSize = blockSizeInBytes;
 
     // find the number of cache lines
-    assert(cacheSize % blockSize == 0 && "Cache Size Must Be a Multiple of BlockSize");
-    this -> numLines = cacheSize / blockSize;
+    assert(this -> cacheSize % this -> blockSize == 0 &&
+        "Cache Size Must Be a Multiple of BlockSize");
+    this -> numLines = this -> cacheSize / this -> blockSize;
 
     // resize cacheLines vector
     this -> cacheLines.resize(this -> numLines);
@@ -27,4 +29,10 @@ void Cache::initCache(size_t cacheSize, size_t blockSize) {
         this -> cacheLines[i].tag = 0;
         this -> cacheLines[i].cacheIndex = i;
     }
+}
+
+void Cache::displayCacheSpecs() {
+    cout << "CACHE SIZE: " << this -> cacheSize << " KB" << endl;
+    cout << "BLOCK SIZE: " << this -> blockSize << " BYTES"<< endl;
+    cout << "NUMBER OF CACHE LINES: " << this -> numLines << " LINES"<< endl;
 }

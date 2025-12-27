@@ -6,6 +6,7 @@
 #define DATAMEM_H
 
 #include <vector>
+#include <cstddef>
 using namespace std;
 
 // simple storage of memory
@@ -13,6 +14,7 @@ struct DataMemory {
     size_t memSize = 0;
     vector<char> memory;
     void initDataMemory(size_t numKB);
+    void displayDataMemorySpecs();
 };
 
 #endif //DATAMEM_H
