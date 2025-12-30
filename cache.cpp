@@ -6,6 +6,10 @@
 
 #include "cache.h"
 #include <iostream>
+#include <iomanip>
+#include <bitset>
+
+#include "dataMem.h"
 using namespace std;
 
 void Cache::initCache(size_t cacheSizeInKB, size_t blockSizeInBytes) {
@@ -35,4 +39,68 @@ void Cache::displayCacheSpecs() {
     cout << "CACHE SIZE: " << this -> cacheSize << " KB" << endl;
     cout << "BLOCK SIZE: " << this -> blockSize << " BYTES"<< endl;
     cout << "NUMBER OF CACHE LINES: " << this -> numLines << " LINES"<< endl;
+}
+
+void Cache::visualizeCache(ofstream& fileStream) {
+    assert(fileStream.is_open() && "Cache Visualization couldn't be opened!");
+
+    fileStream << "Block Size: " << blockSize << " bytes" << endl;
+    fileStream << "Num Lines : " << numLines << endl << endl;
+
+    for (size_t i = 0; i < numLines; i++) {
+        fileStream << "Index " << cacheLines[i].cacheIndex << endl << endl;
+
+        // implement the rest
+    }
+}
+
+// Memory to Cache
+void Cache::readFromMemory(DataMemory &dataMemory, size_t memoryAddress) {
+    size_t blockAddress = getBlockAddress(memoryAddress);
+    size_t cacheIndex = getCacheIndex(blockAddress);
+    size_t tag = getTag(blockAddress);
+
+    // Write back evicted block if dirty
+    if (cacheLines[cacheIndex].dirtyBit) {
+        size_t evictedBlockAddress = cacheLines[cacheIndex].tag * numLines + cacheIndex;
+        size_t memoryOffset = evictedBlockAddress * blockSize;
+        for (size_t offset = 0; offset < blockSize; ++offset, ++memoryOffset) {
+            dataMemory.memory[memoryOffset] = cacheLines[cacheIndex].dataLine[offset];
+        }
+    }
+
+    // Load block from memory into cache line
+    size_t memoryOffset = blockAddress * blockSize;
+    for (size_t offset = 0; offset < blockSize; ++offset, ++memoryOffset) {
+        cacheLines[cacheIndex].dataLine[offset] = dataMemory.memory[memoryOffset];
+    }
+
+    // Update cache line metadata
+    cacheLines[cacheIndex].validBit = true;
+    cacheLines[cacheIndex].dirtyBit = false;
+    cacheLines[cacheIndex].tag = tag;
+}
+
+// Cache to Memory
+void Cache::writeToMemory(DataMemory &dataMemory, size_t memoryAddress) {
+    size_t blockAddress = getBlockAddress(memoryAddress);
+    size_t cacheIndex = getCacheIndex(blockAddress);
+
+    size_t evictedBlockAddress = cacheLines[cacheIndex].tag * numLines + cacheIndex;
+    size_t memoryOffset = evictedBlockAddress * blockSize;
+    for (size_t offset = 0; offset < blockSize; ++offset, ++memoryOffset) {
+        dataMemory.memory[memoryOffset] = cacheLines[cacheIndex].dataLine[offset];
+    }
+}
+
+size_t Cache::getBlockAddress(size_t memAddress) {
+    return memAddress / blockSize;
+}
+
+size_t Cache::getCacheIndex(size_t blockAddress) {
+    return blockAddress % numLines;
+}
+
+size_t Cache::getTag(size_t blockAddress) {
+    return blockAddress / numLines;
 }

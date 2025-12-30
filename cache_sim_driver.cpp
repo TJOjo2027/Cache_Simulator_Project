@@ -95,8 +95,22 @@ int main() {
     cout << endl;
     cout << "FOR THE SAKE OF SIMULATION, THE CACHE WILL BE INITIAL EMPTY" << endl << endl;
 
+    // create visualization files (text file) for the user to see the current state of the cache and data memory
+    ofstream cacheStream;
+    cacheStream.open("cache.txt");
+
+    ofstream dataMemoryStream;
+    dataMemoryStream.open("dataMemory.txt");
+
+    //cache.visualizeCache(cacheStream);
+    cout << "CREATED CACHE AND DATA MEMORY VISUALIZATION FILES" << endl;
+
     // implement cache and data memory interactions
 
+
+
+    cacheStream.close();
+    dataMemoryStream.close();
 
     return 0;
 }

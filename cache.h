@@ -8,6 +8,8 @@
 #include <vector>
 #include <cassert>
 #include <cstddef>
+#include <fstream>
+#include "dataMem.h"
 using namespace std;
 
 struct CacheLine {
@@ -26,6 +28,14 @@ struct Cache {
     vector <CacheLine> cacheLines;
     void initCache(size_t cacheSizeInKB, size_t blockSizeInBytes);
     void displayCacheSpecs();
+    void visualizeCache(ofstream& fileStream);
+    void readFromMemory(DataMemory &dataMemory, size_t memoryAddress);
+    void writeToMemory(DataMemory &dataMemory, size_t memoryAddress);
+    size_t getBlockAddress(size_t memoryAddress);
+    size_t getCacheIndex(size_t blockAddress);
+    size_t getTag(size_t blockAddress);
+
+    void getOffset();
 };
 
 #endif //CACHE_H
