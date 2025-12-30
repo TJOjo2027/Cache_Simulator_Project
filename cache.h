@@ -27,15 +27,14 @@ struct Cache {
     size_t numLines;
     vector <CacheLine> cacheLines;
     void initCache(size_t cacheSizeInKB, size_t blockSizeInBytes);
-    void displayCacheSpecs();
+    void displayCacheSpecs() const;
     void visualizeCache(ofstream& fileStream);
     void readFromMemory(DataMemory &dataMemory, size_t memoryAddress);
-    void writeToMemory(DataMemory &dataMemory, size_t memoryAddress);
-    size_t getBlockAddress(size_t memoryAddress);
-    size_t getCacheIndex(size_t blockAddress);
-    size_t getTag(size_t blockAddress);
-
-    void getOffset();
+    void writeToMemory(DataMemory &dataMemory, size_t memoryAddress) const;
+    size_t getBlockAddress(size_t memoryAddress) const;
+    size_t getOffset(size_t memoryAddress) const;
+    size_t getCacheIndex(size_t blockAddress) const;
+    size_t getTag(size_t blockAddress) const;
 };
 
 #endif //CACHE_H

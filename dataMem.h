@@ -7,6 +7,8 @@
 
 #include <vector>
 #include <cstddef>
+#include <fstream>
+#include "cache.h"
 using namespace std;
 
 // simple storage of memory
@@ -15,6 +17,7 @@ struct DataMemory {
     vector<char> memory;
     void initDataMemory(size_t numKB);
     void displayDataMemorySpecs();
+    void visualizeDataMemory(ofstream &fileStream, Cache cache) const;
 };
 
 #endif //DATAMEM_H

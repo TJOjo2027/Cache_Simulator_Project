@@ -27,4 +27,12 @@ void DataMemory::displayDataMemorySpecs() {
     cout << "DATA MEMORY SIZE: " << this -> memSize << " KB"<< endl;
 }
 
+void DataMemory::visualizeDataMemory(ofstream &fileStream, Cache cache) const {
+    fileStream << "Block Size: " << cache.blockSize << " bytes" << endl;
+
+    // implement formatting for data memory here
+
+}
+
+
 // implement reading and writing (simple)

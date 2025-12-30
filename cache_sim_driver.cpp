@@ -102,7 +102,7 @@ int main() {
     ofstream dataMemoryStream;
     dataMemoryStream.open("dataMemory.txt");
 
-    //cache.visualizeCache(cacheStream);
+    cache.visualizeCache(cacheStream);
     cout << "CREATED CACHE AND DATA MEMORY VISUALIZATION FILES" << endl;
 
     // implement cache and data memory interactions
