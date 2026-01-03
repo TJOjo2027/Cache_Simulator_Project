@@ -12,6 +12,8 @@
 #include "dataMem.h"
 using namespace std;
 
+struct DataMemory; // foward declaration
+
 struct CacheLine {
     bool dirtyBit = false; // 1 is dirty, 0 is clean
     bool validBit = false; // 1 is valid, 0 is not

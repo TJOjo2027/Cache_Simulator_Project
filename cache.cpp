@@ -45,6 +45,7 @@ void Cache::displayCacheSpecs() const {
 void Cache::visualizeCache(ofstream& fileStream) {
     assert(fileStream.is_open() && "Cache Visualization couldn't be opened!");
 
+    fileStream << endl;
     fileStream << "Block Size: " << blockSize << " bytes" << endl;
     fileStream << "Number of Cache Lines: " << numLines << endl << endl;
 
