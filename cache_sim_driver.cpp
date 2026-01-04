@@ -1,25 +1,34 @@
 #include <iostream>
 #include <iomanip>
+#include <filesystem>
+#include <stdexcept>
+#include <thread>
+#include <chrono>
 #include "cache.h"
 #include "dataMem.h"
 #include "simulationStats.h"
 
+namespace fs = std::filesystem;
 using namespace std;
 
 int main() {
+    // clear the window
+    cout << "\033[2J\033[1;1H";
+
+
     cout << "Welcome to the Cache Simulator!" << endl;
 
     // ## SET UP SIMULATOR SETTINGS ##
 
     // initialize the cache
-    cout << "How many KB is the cache for the simulation (no more than 5):" << endl;
+    cout << "How many KB is the cache for the simulation? (no more than 5): ";
     size_t numKBCache;
     cin >> numKBCache;
     assert(numKBCache > 0
         && numKBCache <= 5
         && "Number of KBCache must be less than 5");
 
-    cout << "How big are the blocks in the cache (in bytes)?" << endl;
+    cout << "How big are the blocks in the cache? (in bytes): ";
     size_t sizeBytesCacheBlocks;
     cin >> sizeBytesCacheBlocks;
     assert(sizeBytesCacheBlocks <= numKBCache * 1024
@@ -95,19 +104,97 @@ int main() {
     cout << endl;
     cout << "FOR THE SAKE OF SIMULATION, THE CACHE WILL BE INITIAL EMPTY" << endl << endl;
 
-    // create visualization files (text file) for the user to see the current state of the cache and data memory
+    string folderName = "Simulation_Stats";
+
+    // create the directory just in case it doesn't exist
+    if (!fs::exists(folderName)) {
+        fs::create_directory(folderName);
+        cout << "CREATED SIMULATION STATISTICS FOLDER" << endl;
+    }
+
+    // create visualization files for the user
+
     ofstream cacheStream;
-    cacheStream.open("cache.txt");
+    cacheStream.open(folderName + "/cache.txt");
 
     ofstream dataMemoryStream;
-    dataMemoryStream.open("dataMemory.txt");
+    dataMemoryStream.open(folderName + "/dataMemory.txt");
 
-    cache.visualizeCache(cacheStream);
-    dataMemory.visualizeDataMemory(dataMemoryStream, cache);
-    cout << "CREATED CACHE AND DATA MEMORY VISUALIZATION FILES" << endl;
+    try {
+        if (!cacheStream || !dataMemoryStream) {
+            throw runtime_error("Unable to open file");
+        }
+
+        cache.visualizeCache(cacheStream);
+        dataMemory.visualizeDataMemory(dataMemoryStream, cache);
+    }
+    catch (const exception &e) {
+        cerr << "CRITICAL FILE PATHING ERROR: " << e.what() << endl;
+    }
+
+    cout << "CREATED VISUALIZATION FILES INSIDE: " << folderName << endl;
+    cout << "PATH: " << fs::absolute(folderName).string() << endl;
+
 
     // implement cache and data memory interactions
 
+    this_thread::sleep_for(chrono::seconds(5));
+
+    /*
+     * Here's the rundown: There will be reading and writing instructions being run (that's all it can do anyways)
+     * This will be indicated with the keyword READ or WRITE.
+     * You are reading/writing to a certain memory address so a normal simulation instruction would look like this:
+     * WRITE [MEMORY ADDRESS] or READ [MEMORY ADDRESS]
+     * The read and write keywords are very important so spelling them wrong warrants a retype (emulating a correct compiler)
+     * At the end of simulation, the keyword QUIT can be used to exist the simulation
+     */
+
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    // clearing the window
+    cout << "\033[2J\033[1;1H";
+
+    // keep the loop running unless there is a break
+    while (true) {
+        string instruction;
+        string commandWord;
+        size_t memoryAddress;
+
+        cout << "INSTRUCTION " << simulationStats.totalAccesses << ": ";
+        getline(cin, instruction);
+        stringstream ss(instruction);
+        ss >> commandWord;
+
+        // case of a read instruction
+        if (commandWord == "READ") {
+            // implement reading logic and stat and sim_log updates
+
+
+
+            simulationStats.totalAccesses++;
+        }
+
+        // case of a write instruction
+        else if (commandWord == "WRITE") {
+            // implement writing logic and stat and sim_log updates
+
+
+
+            simulationStats.totalAccesses++;
+        }
+
+        // case of an exit
+        else if (commandWord == "QUIT") {
+            cout << "EXITING SIMULATION!" << endl;
+            break;
+        }
+
+        // case of bad instruction (command word)
+        else {
+            cout << "INVALID INSTRUCTION" << endl;
+        }
+    }
+    cout << "Simulation Done" << endl;
 
 
     cacheStream.close();
