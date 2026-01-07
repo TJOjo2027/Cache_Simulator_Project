@@ -91,19 +91,10 @@ void Cache::visualizeCache(ofstream& fileStream) {
 }
 
 // Memory to Cache
-void Cache::readFromMemory(DataMemory &dataMemory, size_t memoryAddress) {
+void Cache::readFromMemory(DataMemory &dataMemory, size_t memoryAddress, SimulationStats &stats) {
     size_t blockAddress = getBlockAddress(memoryAddress);
     size_t cacheIndex = getCacheIndex(blockAddress);
     size_t tag = getTag(blockAddress);
-
-    // Write back evicted block if dirty (dirty-eviction)
-    if (cacheLines[cacheIndex].dirtyBit && cacheLines[cacheIndex].validBit) {
-        size_t evictedBlockAddress = cacheLines[cacheIndex].tag * numLines + cacheIndex;
-        size_t memoryOffset = evictedBlockAddress * blockSize;
-        for (size_t offset = 0; offset < blockSize; ++offset, ++memoryOffset) {
-            dataMemory.memory[memoryOffset] = static_cast<char>(cacheLines[cacheIndex].dataLine[offset]);
-        }
-    }
 
     // Load block from memory into cache line
     size_t memoryOffset = blockAddress * blockSize;
@@ -118,15 +109,61 @@ void Cache::readFromMemory(DataMemory &dataMemory, size_t memoryAddress) {
 }
 
 // Cache to Memory
-void Cache::writeToMemory(DataMemory &dataMemory, size_t memoryAddress) const{
-    size_t blockAddress = getBlockAddress(memoryAddress);
-    size_t cacheIndex = getCacheIndex(blockAddress);
-
-    size_t evictedBlockAddress = cacheLines[cacheIndex].tag * numLines + cacheIndex;
-    size_t memoryOffset = evictedBlockAddress * blockSize;
+void Cache::writeToMemory(DataMemory &dataMemory, size_t memoryAddress, SimulationStats &stats) const {
+    size_t cacheIndex = getCacheIndex(getBlockAddress(memoryAddress));
+    size_t currentTag = cacheLines[cacheIndex].tag;
+    size_t originalBlockAddress = (currentTag * numLines) + cacheIndex;
+    size_t memoryOffset = originalBlockAddress * blockSize;
     for (size_t offset = 0; offset < blockSize; ++offset, ++memoryOffset) {
         dataMemory.memory[memoryOffset] = static_cast<char>(cacheLines[cacheIndex].dataLine[offset]);
     }
+}
+
+// This is the "Brain" of your cache
+bool Cache::access(DataMemory &dataMemory, size_t memoryAddress, SimulationStats &stats, bool writeCommand) {
+    size_t blockAddress = getBlockAddress(memoryAddress);
+    size_t cacheIndex = getCacheIndex(blockAddress);
+    size_t tag = getTag(blockAddress);
+
+    // handles the number of access, increments it
+    stats.totalAccesses++;
+
+    // checking for a hit
+    if (cacheLines[cacheIndex].validBit && cacheLines[cacheIndex].tag == tag) {
+        // case of hit
+        stats.hits++;
+        stats.simulationCycles += stats.hitTimeCycles;
+
+        if (writeCommand) {
+            // line is dirty now
+            cacheLines[cacheIndex].dirtyBit = true;
+            // replacing the data at the area with asterix to show the change (dummy value)
+            cacheLines[cacheIndex].dataLine[getOffset(memoryAddress)] = static_cast<char>(42);
+        }
+        return true;
+    }
+
+    // 2. MISS CASE
+    stats.misses++;
+
+    // check for dirty eviction penalty
+    if (cacheLines[cacheIndex].validBit && cacheLines[cacheIndex].dirtyBit) {
+        stats.writeBacks++;
+        stats.simulationCycles += stats.writePenaltyCycles;
+        // Call your writeToMemory here to save the old data
+        writeToMemory(dataMemory, memoryAddress, stats);
+    }
+
+    // Fetch the new data from memory
+    stats.simulationCycles += stats.readPenaltyCycles;
+    readFromMemory(dataMemory, memoryAddress, stats);
+
+    // If it was a WRITE miss, we mark it dirty after fetching it
+    if (writeCommand) {
+        cacheLines[cacheIndex].dirtyBit = true;
+    }
+    // false for a miss
+    return false;
 }
 
 size_t Cache::getBlockAddress(size_t memAddress) const {

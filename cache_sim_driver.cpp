@@ -28,6 +28,8 @@ int main() {
         && numKBCache <= 5
         && "Number of KBCache must be less than 5");
 
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    
     cout << "How big are the blocks in the cache? (in bytes): ";
     size_t sizeBytesCacheBlocks;
     cin >> sizeBytesCacheBlocks;
@@ -104,12 +106,12 @@ int main() {
     cout << endl;
     cout << "FOR THE SAKE OF SIMULATION, THE CACHE WILL BE INITIAL EMPTY" << endl << endl;
 
-    string folderName = "Simulation_Stats";
+    string folderName = "Simulation_Results";
 
     // create the directory just in case it doesn't exist
     if (!fs::exists(folderName)) {
         fs::create_directory(folderName);
-        cout << "CREATED SIMULATION STATISTICS FOLDER" << endl;
+        cout << "CREATED SIMULATION RESULTS FOLDER" << endl;
     }
 
     // create visualization files for the user
@@ -154,6 +156,9 @@ int main() {
     // clearing the window
     cout << "\033[2J\033[1;1H";
 
+    ofstream resultStream;
+    resultStream.open(folderName + "/simulation_results.txt");
+
     // keep the loop running unless there is a break
     while (true) {
         string instruction;
@@ -167,20 +172,23 @@ int main() {
 
         // case of a read instruction
         if (commandWord == "READ") {
-            // implement reading logic and stat and sim_log updates
+            // read in the memory address from the ss
+            ss >> memoryAddress;
 
+            // output the instruction to the simulation results text file
 
+            // read from memory (handles all the stats)
 
-            simulationStats.totalAccesses++;
         }
 
         // case of a write instruction
         else if (commandWord == "WRITE") {
-            // implement writing logic and stat and sim_log updates
+            // read in the memory address from the ss
+            ss >> memoryAddress;
 
+            // output the instruction to the simulation results text file
 
-
-            simulationStats.totalAccesses++;
+            // write from memory (handles all the stats)
         }
 
         // case of an exit

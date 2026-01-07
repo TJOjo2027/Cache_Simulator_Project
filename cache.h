@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <fstream>
 #include "dataMem.h"
+#include "simulationStats.h"
 using namespace std;
 
 struct DataMemory; // foward declaration
@@ -31,8 +32,9 @@ struct Cache {
     void initCache(size_t cacheSizeInKB, size_t blockSizeInBytes);
     void displayCacheSpecs() const;
     void visualizeCache(ofstream& fileStream);
-    void readFromMemory(DataMemory &dataMemory, size_t memoryAddress);
-    void writeToMemory(DataMemory &dataMemory, size_t memoryAddress) const;
+    void readFromMemory(DataMemory &dataMemory, size_t memoryAddress, SimulationStats &stats);
+    void writeToMemory(DataMemory &dataMemory, size_t memoryAddress, SimulationStats &stats) const;
+    bool access(DataMemory &dataMemory, size_t memoryAddress, SimulationStats &stats, bool writeCommand);
     size_t getBlockAddress(size_t memoryAddress) const;
     size_t getOffset(size_t memoryAddress) const;
     size_t getCacheIndex(size_t blockAddress) const;
