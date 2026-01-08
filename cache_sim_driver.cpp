@@ -170,15 +170,25 @@ int main() {
         stringstream ss(instruction);
         ss >> commandWord;
 
+        bool cacheHit = false;
         // case of a read instruction
         if (commandWord == "READ") {
             // read in the memory address from the ss
             ss >> memoryAddress;
 
             // output the instruction to the simulation results text file
+            resultStream << commandWord << " " << memoryAddress << endl;
 
-            // read from memory (handles all the stats)
+            // access!
+            cacheHit = cache.access(dataMemory, memoryAddress, simulationStats, false);
 
+            // update files and visualization in event of a hit or miss
+            if (cacheHit) {
+                cout << "CACHE HIT (ADD DETAILS)" << endl;
+            }
+            else {
+                cout << "CACHE MISS (ADD DETAILS)" << endl;
+            }
         }
 
         // case of a write instruction
@@ -187,8 +197,18 @@ int main() {
             ss >> memoryAddress;
 
             // output the instruction to the simulation results text file
+            resultStream << commandWord << " " << memoryAddress << endl;
 
-            // write from memory (handles all the stats)
+            // access!
+            cacheHit = cache.access(dataMemory, memoryAddress, simulationStats, true);
+
+            // update files and visualization in event of a hit or miss
+            if (cacheHit) {
+                cout << "CACHE HIT (ADD DETAILS)" << endl;
+            }
+            else {
+                cout << "CACHE MISS (ADD DETAILS)" << endl;
+            }
         }
 
         // case of an exit
@@ -201,12 +221,25 @@ int main() {
         else {
             cout << "INVALID INSTRUCTION" << endl;
         }
-    }
-    cout << "Simulation Done" << endl;
+        // update the text files
+        cacheStream.open(folderName + "/cache.txt", ios::trunc);
+        dataMemoryStream.open(folderName + "/dataMemory.txt", ios::trunc);
 
+        if (cacheStream.is_open() && dataMemoryStream.is_open()) {
+            cache.visualizeCache(cacheStream);
+            dataMemory.visualizeDataMemory(dataMemoryStream, cache);
+
+            cacheStream.close();
+            dataMemoryStream.close();
+        }
+    }
+    cout << "Simulation Done, printing sim results" << endl;
+
+    simulationStats.printStats(resultStream);
 
     cacheStream.close();
     dataMemoryStream.close();
+    resultStream.close();
 
     return 0;
 }

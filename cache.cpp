@@ -45,7 +45,6 @@ void Cache::displayCacheSpecs() const {
 void Cache::visualizeCache(ofstream& fileStream) {
     assert(fileStream.is_open() && "Cache Visualization couldn't be opened!");
 
-    fileStream << endl;
     fileStream << "Block Size: " << blockSize << " bytes" << endl;
     fileStream << "Number of Cache Lines: " << numLines << endl << endl;
 
@@ -119,7 +118,6 @@ void Cache::writeToMemory(DataMemory &dataMemory, size_t memoryAddress, Simulati
     }
 }
 
-// This is the "Brain" of your cache
 bool Cache::access(DataMemory &dataMemory, size_t memoryAddress, SimulationStats &stats, bool writeCommand) {
     size_t blockAddress = getBlockAddress(memoryAddress);
     size_t cacheIndex = getCacheIndex(blockAddress);
@@ -143,7 +141,7 @@ bool Cache::access(DataMemory &dataMemory, size_t memoryAddress, SimulationStats
         return true;
     }
 
-    // 2. MISS CASE
+    // miss case
     stats.misses++;
 
     // check for dirty eviction penalty

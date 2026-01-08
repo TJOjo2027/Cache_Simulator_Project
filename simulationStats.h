@@ -4,6 +4,7 @@
 
 #ifndef SIMULATIONSTATS_H
 #define SIMULATIONSTATS_H
+#include <fstream>
 
 using namespace std;
 #include <cstddef>
@@ -37,6 +38,10 @@ struct SimulationStats {
 
     // displaying customizable timing
     void printCycleStats();
+
+    // runtime simulation calculations
+    void updateSimulationStats();
+    void printStats(ofstream &printStream);
 };
 
 #endif //SIMULATIONSTATS_H
