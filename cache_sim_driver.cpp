@@ -75,10 +75,14 @@ int main() {
         else if (timingConfigQuestionChar == 'N'
             || timingConfigQuestionChar == 'n') {
             // have some setters to change setting
+            size_t clockSpeed;
             size_t hitTimeCycles;
             size_t writePenaltyCycles;
             size_t readPenaltyCycles;
 
+            cout << "Change Clock Speed (nanoseconds)" << endl;
+            cin >> clockSpeed;
+            simulationStats.setClockSpeed(clockSpeed);
             cout << "Change Hit Time (cycles)" << endl;
             cin >> hitTimeCycles;
             simulationStats.setHitTimeCycles(hitTimeCycles);
@@ -89,7 +93,7 @@ int main() {
             cin >> readPenaltyCycles;
             simulationStats.setReadPenaltyCycles(readPenaltyCycles);
 
-            cout << "NEW SIMULATION STATS" << endl;
+            cout << endl << "NEW SIMULATION STATS" << endl;
             cout << setw(20) << setfill('=') << "" << setfill(' ') << endl << endl;
             simulationStats.printCycleStats();
 
@@ -117,10 +121,10 @@ int main() {
     // create visualization files for the user
 
     ofstream cacheStream;
-    cacheStream.open(folderName + "/cache.txt");
+    cacheStream.open(folderName + "/cache.txt", ios::out | ios::trunc);
 
     ofstream dataMemoryStream;
-    dataMemoryStream.open(folderName + "/dataMemory.txt");
+    dataMemoryStream.open(folderName + "/dataMemory.txt", ios::out | ios::trunc);
 
     try {
         if (!cacheStream || !dataMemoryStream) {
@@ -129,6 +133,9 @@ int main() {
 
         cache.visualizeCache(cacheStream);
         dataMemory.visualizeDataMemory(dataMemoryStream, cache);
+
+        cacheStream.close();
+        dataMemoryStream.close();
     }
     catch (const exception &e) {
         cerr << "CRITICAL FILE PATHING ERROR: " << e.what() << endl;
@@ -158,6 +165,10 @@ int main() {
 
     ofstream resultStream;
     resultStream.open(folderName + "/simulation_results.txt");
+
+    // get the file text header
+
+    resultStream << "INSTRUCTIONS RAN" << endl << endl;
 
     // keep the loop running unless there is a break
     while (true) {
@@ -235,6 +246,7 @@ int main() {
     }
     cout << "Simulation Done, printing sim results" << endl;
 
+    resultStream << endl << "SIMULATION STATISTICS" << endl << endl;
     simulationStats.printStats(resultStream);
 
     cacheStream.close();

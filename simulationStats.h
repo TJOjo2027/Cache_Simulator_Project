@@ -22,6 +22,7 @@ struct SimulationStats {
     double missRate = 0.0;
 
     // timings
+    size_t clockSpeed = 1; // in nano-seconds
     size_t hitTimeCycles = 1;
     size_t writePenaltyCycles = 50;
     size_t readPenaltyCycles = 50;
@@ -35,9 +36,10 @@ struct SimulationStats {
     void setHitTimeCycles(size_t cycles);
     void setWritePenaltyCycles(size_t cycles);
     void setReadPenaltyCycles(size_t cycles);
+    void setClockSpeed(size_t speedInNS);
 
     // displaying customizable timing
-    void printCycleStats();
+    void printCycleStats() const;
 
     // runtime simulation calculations
     void updateSimulationStats();

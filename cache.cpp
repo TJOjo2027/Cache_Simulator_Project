@@ -126,11 +126,12 @@ bool Cache::access(DataMemory &dataMemory, size_t memoryAddress, SimulationStats
     // handles the number of access, increments it
     stats.totalAccesses++;
 
+    stats.simulationCycles += stats.hitTimeCycles;
+
     // checking for a hit
     if (cacheLines[cacheIndex].validBit && cacheLines[cacheIndex].tag == tag) {
         // case of hit
         stats.hits++;
-        stats.simulationCycles += stats.hitTimeCycles;
 
         if (writeCommand) {
             // line is dirty now
@@ -159,6 +160,8 @@ bool Cache::access(DataMemory &dataMemory, size_t memoryAddress, SimulationStats
     // If it was a WRITE miss, we mark it dirty after fetching it
     if (writeCommand) {
         cacheLines[cacheIndex].dirtyBit = true;
+        // replacing the data at the area with asterix to show the change (dummy value)
+        cacheLines[cacheIndex].dataLine[getOffset(memoryAddress)] = static_cast<char>(42);
     }
     // false for a miss
     return false;
