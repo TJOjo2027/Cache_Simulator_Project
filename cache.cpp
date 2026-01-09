@@ -122,49 +122,82 @@ bool Cache::access(DataMemory &dataMemory, size_t memoryAddress, SimulationStats
     size_t blockAddress = getBlockAddress(memoryAddress);
     size_t cacheIndex = getCacheIndex(blockAddress);
     size_t tag = getTag(blockAddress);
+    size_t offset = getOffset(memoryAddress);
+    size_t oldAddress;
 
-    // handles the number of access, increments it
     stats.totalAccesses++;
+    stats.simulationCycles += stats.hitTimeCycles; // Tag check happens for everyone
 
-    stats.simulationCycles += stats.hitTimeCycles;
+    bool hit = (cacheLines[cacheIndex].validBit && cacheLines[cacheIndex].tag == tag);
+    bool wasDirtyEviction = false;
+    size_t cyclesAdded = stats.hitTimeCycles;
 
-    // checking for a hit
-    if (cacheLines[cacheIndex].validBit && cacheLines[cacheIndex].tag == tag) {
-        // case of hit
+    if (hit) {
+        // hit case
         stats.hits++;
+        if (writeCommand) {
+            cacheLines[cacheIndex].dirtyBit = true;
+            cacheLines[cacheIndex].dataLine[offset] = '*';
+        }
+    }
+    else {
+        // miss case
+        stats.misses++;
+
+        if (cacheLines[cacheIndex].validBit && cacheLines[cacheIndex].dirtyBit) {
+            wasDirtyEviction = true;
+            stats.writeBacks++;
+            stats.simulationCycles += stats.writePenaltyCycles;
+            cyclesAdded += stats.writePenaltyCycles;
+
+            oldAddress = (cacheLines[cacheIndex].tag * numLines + cacheIndex) * blockSize;
+            writeToMemory(dataMemory, oldAddress, stats);
+        }
+
+        stats.simulationCycles += stats.readPenaltyCycles;
+        cyclesAdded += stats.readPenaltyCycles;
+        readFromMemory(dataMemory, memoryAddress, stats);
 
         if (writeCommand) {
-            // line is dirty now
             cacheLines[cacheIndex].dirtyBit = true;
-            // replacing the data at the area with asterix to show the change (dummy value)
-            cacheLines[cacheIndex].dataLine[getOffset(memoryAddress)] = static_cast<char>(42);
+            cacheLines[cacheIndex].dataLine[offset] = '*';
+        } else {
+            cacheLines[cacheIndex].dirtyBit = false;
         }
-        return true;
     }
 
-    // miss case
-    stats.misses++;
-
-    // check for dirty eviction penalty
-    if (cacheLines[cacheIndex].validBit && cacheLines[cacheIndex].dirtyBit) {
-        stats.writeBacks++;
-        stats.simulationCycles += stats.writePenaltyCycles;
-        // Call your writeToMemory here to save the old data
-        writeToMemory(dataMemory, memoryAddress, stats);
-    }
-
-    // Fetch the new data from memory
-    stats.simulationCycles += stats.readPenaltyCycles;
-    readFromMemory(dataMemory, memoryAddress, stats);
-
-    // If it was a WRITE miss, we mark it dirty after fetching it
+    string typeLabel;
     if (writeCommand) {
-        cacheLines[cacheIndex].dirtyBit = true;
-        // replacing the data at the area with asterix to show the change (dummy value)
-        cacheLines[cacheIndex].dataLine[getOffset(memoryAddress)] = static_cast<char>(42);
+        typeLabel = "[WRITE] to";
     }
-    // false for a miss
-    return false;
+    else {
+        typeLabel = "[READ] from";
+    }
+
+    string statusStr;
+    if (hit) {
+        statusStr = "HIT";
+    } else {
+        statusStr = wasDirtyEviction ? "MISS (DIRTY EVICTION)" : "MISS (COLD/CLEAN)";
+    }
+
+    cout << endl << typeLabel << " ADDRESS " << memoryAddress << " | "
+         << statusStr << " | "
+         << "CYCLES: +" << cyclesAdded << " | "
+         << "TOTAL CYCLES: " << stats.simulationCycles << endl;
+
+    cout << "CACHE MAPPING | Block: " << blockAddress << " | "
+         << "Index: " << cacheIndex << " | "
+         << "Tag: " << tag << " | "
+         << "Offset: " << offset;
+
+    if (wasDirtyEviction) {
+        cout << " | [WRITE-BACK OLD ADDR: "
+        << oldAddress << "]";
+    }
+    cout << endl << endl;
+
+    return hit;
 }
 
 size_t Cache::getBlockAddress(size_t memAddress) const {

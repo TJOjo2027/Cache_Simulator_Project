@@ -150,7 +150,7 @@ int main() {
     this_thread::sleep_for(chrono::seconds(5));
 
     /*
-     * Here's the rundown: There will be reading and writing instructions being run (that's all it can do anyways)
+     * Here's the rundown: There will be reading and writing instructions being run (that's all it can do anyway)
      * This will be indicated with the keyword READ or WRITE.
      * You are reading/writing to a certain memory address so a normal simulation instruction would look like this:
      * WRITE [MEMORY ADDRESS] or READ [MEMORY ADDRESS]
@@ -181,24 +181,24 @@ int main() {
         stringstream ss(instruction);
         ss >> commandWord;
 
-        bool cacheHit = false;
+        bool cacheHit;
         // case of a read instruction
         if (commandWord == "READ") {
             // read in the memory address from the ss
             ss >> memoryAddress;
 
             // output the instruction to the simulation results text file
-            resultStream << commandWord << " " << memoryAddress << endl;
+            resultStream << commandWord << " " << memoryAddress;
 
             // access!
             cacheHit = cache.access(dataMemory, memoryAddress, simulationStats, false);
 
             // update files and visualization in event of a hit or miss
             if (cacheHit) {
-                cout << "CACHE HIT (ADD DETAILS)" << endl;
+                resultStream << " [HIT]" << endl;
             }
             else {
-                cout << "CACHE MISS (ADD DETAILS)" << endl;
+                resultStream << " [MISS]" << endl;
             }
         }
 
@@ -208,17 +208,17 @@ int main() {
             ss >> memoryAddress;
 
             // output the instruction to the simulation results text file
-            resultStream << commandWord << " " << memoryAddress << endl;
+            resultStream << commandWord << " " << memoryAddress;
 
             // access!
             cacheHit = cache.access(dataMemory, memoryAddress, simulationStats, true);
 
             // update files and visualization in event of a hit or miss
             if (cacheHit) {
-                cout << "CACHE HIT (ADD DETAILS)" << endl;
+                resultStream << " [HIT]" << endl;
             }
             else {
-                cout << "CACHE MISS (ADD DETAILS)" << endl;
+                resultStream << " [MISS]" << endl;
             }
         }
 
@@ -244,10 +244,12 @@ int main() {
             dataMemoryStream.close();
         }
     }
-    cout << "Simulation Done, printing sim results" << endl;
+    cout << endl << "Simulation Done, printing simulation results" << endl;
 
     resultStream << endl << "SIMULATION STATISTICS" << endl << endl;
     simulationStats.printStats(resultStream);
+
+    this_thread::sleep_for(chrono::seconds(5));
 
     cacheStream.close();
     dataMemoryStream.close();
