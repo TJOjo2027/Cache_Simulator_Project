@@ -18,24 +18,56 @@ int main() {
 
     cout << "Welcome to the Cache Simulator!" << endl;
 
-    // ## SET UP SIMULATOR SETTINGS ##
+    // Simulator Setup
 
-    // initialize the cache
-    cout << "How many KB is the cache for the simulation? (no more than 5): ";
-    size_t numKBCache;
-    cin >> numKBCache;
-    assert(numKBCache > 0
-        && numKBCache <= 5
-        && "Number of KBCache must be less than 5");
+    size_t numKBCache = 0;
+    while (true) {
+        cout << "How many KB is the cache for the simulation? (no more than 5): ";
+        cin >> numKBCache;
 
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    
-    cout << "How big are the blocks in the cache? (in bytes): ";
-    size_t sizeBytesCacheBlocks;
-    cin >> sizeBytesCacheBlocks;
-    assert(sizeBytesCacheBlocks <= numKBCache * 1024
-        && sizeBytesCacheBlocks > 0
-        && "Size of block(s) must be less than the cache size");
+        if (!cin) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please enter a number.\n";
+            continue;
+        }
+
+        if (numKBCache >= 1 && numKBCache <= 5) {
+            break;
+        }
+
+        cout << "Cache size must be between 1 and 5 KB.\n";
+    }
+
+    size_t sizeBytesCacheBlocks = 0;
+    while (true) {
+        cout << "How big are the blocks in the cache? (in bytes): ";
+        cin >> sizeBytesCacheBlocks;
+
+        if (!cin) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input. Please enter a number.\n";
+            continue;
+        }
+
+        if (sizeBytesCacheBlocks == 0) {
+            cout << "Block size must be greater than 0.\n";
+            continue;
+        }
+
+        if (sizeBytesCacheBlocks > numKBCache * 1024) {
+            cout << "Block size cannot exceed cache size.\n";
+            continue;
+        }
+
+        if ((numKBCache * 1024) % sizeBytesCacheBlocks != 0) {
+            cout << "Block size must evenly divide cache size.\n";
+            continue;
+        }
+
+        break;
+    }
 
     Cache cache;
     cache.initCache(numKBCache, sizeBytesCacheBlocks);
@@ -185,8 +217,16 @@ int main() {
         // case of a read instruction
         if (commandWord == "READ") {
             // read in the memory address from the ss
-            ss >> memoryAddress;
+            if (!(ss >> memoryAddress)) {
+                cout << "INVALID MEMORY ADDRESS FORMAT" << endl;
+                continue;
+            }
 
+            // check for invalid memory address
+            if (memoryAddress >= dataMemory.memSize) {
+                cout << "INVALID MEMORY ACCESS" << endl;
+                continue;
+            }
             // output the instruction to the simulation results text file
             resultStream << commandWord << " " << memoryAddress;
 
@@ -205,8 +245,16 @@ int main() {
         // case of a write instruction
         else if (commandWord == "WRITE") {
             // read in the memory address from the ss
-            ss >> memoryAddress;
+            if (!(ss >> memoryAddress)) {
+                cout << "INVALID MEMORY ADDRESS FORMAT" << endl;
+                continue;
+            }
 
+            // check for invalid memory address
+            if (memoryAddress >= dataMemory.memSize) {
+                cout << "INVALID MEMORY ACCESS" << endl;
+                continue;
+            }
             // output the instruction to the simulation results text file
             resultStream << commandWord << " " << memoryAddress;
 
